@@ -4,6 +4,7 @@
 #define VOXEL_GRID_H
 
 #include <pcl/point_types.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include <unordered_map>
 
 
@@ -14,23 +15,11 @@ using GridZ = std::unordered_map<int, int>;
 using GridY = std::unordered_map<int, GridZ>;
 using GridMap = std::unordered_map<int, GridY>;
 
-// Defines grid bounds.
-struct GridBounds {
-  float min_x = 0;
-  float max_x = 0;
-  float min_y = 0;
-  float max_y = 0;
-  float min_z = 0;
-  float max_z = 0;
-};
-
 // Defines a voxel grid.
 class VoxelGrid {
   public:
-    // Constructs a voxel grid of square voxels of the given edge length, and
-    // creates the grid to fit the given bounds. At least one extra cell will be
-    // padded between the minimum and maximum bound for each dimension.
-    VoxelGrid(const float cell_size, const GridBounds &bounds);
+    // Builds the voxel grid using the bounds given by the point cloud. Each
+    // voxel will be a cube with edge length set to cell_size.
     VoxelGrid(const float cell_size,
               const pcl::PointCloud<pcl::PointXYZ> &cloud);
 
@@ -55,7 +44,7 @@ class VoxelGrid {
         const VoxelGrid &filter, const int x, const int y, const int z) const;
 
     // Adds the voxel lines to be displayed in the 3D viewer for visualization.
-    void AddToViewer() const;
+    void AddToViewer(pcl::visualization::PCLVisualizer *viewer) const;
 
   private:
     const float cell_size_;

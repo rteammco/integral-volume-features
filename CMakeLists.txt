@@ -11,5 +11,6 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable(ivfeatures src/main.cpp)
+file(GLOB ivfeatures_src "src/*.h" "src/*.cpp")
+add_executable(ivfeatures ${ivfeatures_src})
 target_link_libraries(ivfeatures ${PCL_LIBRARIES})

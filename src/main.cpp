@@ -7,6 +7,7 @@
 
 #include "voxel_grid.h"
 
+using iv_descriptor::VoxelGrid;
 using pcl::PointCloud;
 using pcl::PointXYZ;
 using pcl::visualization::PCL_VISUALIZER_POINT_SIZE;
@@ -35,24 +36,25 @@ int main (int argc, char **argv) {
   // Computing interior of voxel grid.
   // Ball Voxel Grid builder.
 
-  //const std::string filename = "../data/bun000.ply";
   const std::string filename = "../data/table_scene_lms400.pcd";
+  // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-  // Load the file.
-  //pcl::PLYReader reader;
   pcl::PCDReader reader;
   if (reader.read<PointXYZ>(filename, *cloud) == -1) {
     PCL_ERROR("Couldn't read file!\n");
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
-  // Load the PCL 3D visualization window.
+  VoxelGrid voxel_grid(0.5, *cloud);
+  // Load the PCL 3D visualization window and add the point cloud and voxel
+  // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");
   viewer.setBackgroundColor(0, 0, 0);
   PointCloudColorHandlerCustom<PointXYZ> single_color(cloud, 0, 255, 0);
   viewer.addPointCloud<PointXYZ>(cloud, single_color, "Point Cloud");
   viewer.setPointCloudRenderingProperties(
       PCL_VISUALIZER_POINT_SIZE, 1, "Point Cloud");
+  voxel_grid.AddToViewer(&viewer);
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
   viewer.spin();
