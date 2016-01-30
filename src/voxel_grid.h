@@ -1,8 +1,18 @@
+// This file... TODO comments.
+
 #ifndef VOXEL_GRID_H
 #define VOXEL_GRID_H
 
+#include <pcl/point_types.h>
+#include <unordered_map>
+
 
 namespace iv_descriptor {
+
+// A 3D grid map: GridMap[x][y][z] = val. Defines a sparse 3D grid.
+using GridZ = std::unordered_map<int, int>;
+using GridY = std::unordered_map<int, GridZ>;
+using GridMap = std::unordered_map<int, GridY>;
 
 // Defines grid bounds.
 struct GridBounds {
@@ -21,6 +31,8 @@ class VoxelGrid {
     // creates the grid to fit the given bounds. At least one extra cell will be
     // padded between the minimum and maximum bound for each dimension.
     VoxelGrid(const float cell_size, const GridBounds &bounds);
+    VoxelGrid(const float cell_size,
+              const pcl::PointCloud<pcl::PointXYZ> &cloud);
 
     // Performs a single convolution operation of the given filter at the given
     // (x, y, z) location in 3D space. This location is translated into cell
@@ -47,6 +59,19 @@ class VoxelGrid {
 
   private:
     const float cell_size_;
+    float min_x_;
+    float min_y_;
+    float min_z_;
+    int max_x_index_;
+    int max_y_index_;
+    int max_z_index_;
+
+    // The GridMap contains all of the voxel volumes. Access as follows:
+    //   grid_map_[x][y][z] = val;
+    // Writing is possible to any arbitrary coordinate. Reading from an
+    // undefined coordinate will automatically return a default value of 0.
+    GridMap grid_map_;
+
 };  // class VoxelGrid
 
 };  // namespace iv_descriptor
