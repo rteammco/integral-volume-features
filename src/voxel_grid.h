@@ -4,7 +4,6 @@
 
 namespace iv_descriptor {
 
-
 // Defines grid bounds.
 struct GridBounds {
   float min_x = 0;
@@ -14,7 +13,6 @@ struct GridBounds {
   float min_z = 0;
   float max_z = 0;
 };
-
 
 // Defines a voxel grid.
 class VoxelGrid {
@@ -51,7 +49,7 @@ class VoxelGrid {
     const float cell_size_;
 };  // class VoxelGrid
 
-}  // namespace iv_descriptor
+};  // namespace iv_descriptor
 
 
 #endif  // VOXEL_GRID_H
