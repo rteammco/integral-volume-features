@@ -23,6 +23,11 @@ class VoxelGrid {
     VoxelGrid(const float cell_size,
               const pcl::PointCloud<pcl::PointXYZ> &cloud);
 
+    // Returns a cubic VoxelGrid that contains a voxelized ball (sphere) of
+    // the given radius. Voxels that are inside the sphere have a value of 1,
+    // and all other voxels get a value of 0.
+    VoxelGrid(const float cell_size, const int radius);
+
     // Performs a single convolution operation of the given filter at the given
     // (x, y, z) location in 3D space. This location is translated into cell
     // coordinates and then the convolution is computed with ConvolveAtCell().
@@ -44,10 +49,11 @@ class VoxelGrid {
         const VoxelGrid &filter, const int x, const int y, const int z) const;
 
     // Adds the voxel lines to be displayed in the 3D viewer for visualization.
-    void AddToViewer(pcl::visualization::PCLVisualizer *viewer) const;
+    void AddToViewer(pcl::visualization::PCLVisualizer *viewer);
 
   private:
-    const float cell_size_;
+    // Grid size variables.
+    float cell_size_;
     float min_x_;
     float min_y_;
     float min_z_;

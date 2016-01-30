@@ -19,7 +19,7 @@ int main (int argc, char **argv) {
   // Process args.
   // Load data model.
   // Determine voxel grid cell size.
-  // Build voxel grid.
+  // -!- Build voxel grid.
   // Determine which voxels are interior and which are exterior.
   // Create grid ball.
   // For each point in the cloud, compute the intersection.
@@ -46,6 +46,7 @@ int main (int argc, char **argv) {
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
   VoxelGrid voxel_grid(0.8, *cloud);
+  VoxelGrid ball_grid(0.1, 5);
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");
@@ -54,7 +55,8 @@ int main (int argc, char **argv) {
   viewer.addPointCloud<PointXYZ>(cloud, single_color, "Point Cloud");
   viewer.setPointCloudRenderingProperties(
       PCL_VISUALIZER_POINT_SIZE, 1, "Point Cloud");
-  voxel_grid.AddToViewer(&viewer);
+  //voxel_grid.AddToViewer(&viewer);
+  ball_grid.AddToViewer(&viewer);
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
   viewer.spin();

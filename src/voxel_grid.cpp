@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 
+#include <iostream>
+
 using pcl::PointCloud;
 using pcl::PointXYZ;
 
@@ -26,13 +28,13 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
   std::vector<float> line_start = {0, 0, 0};
   std::vector<float> line_end = {0, 0, 0};
   line_start[d0] = min_d0;
-  line_end[d0] = min_d0 + (num_d0 - 1) * cell_size;
+  line_end[d0] = min_d0 + num_d0 * cell_size;
   std::ostringstream id_sstream;
-  for (int i = 0; i < num_d1; ++i) {
+  for (int i = 0; i <= num_d1; ++i) {
     const float pos_i = min_d1 + i * cell_size;
     line_start[d1] = pos_i;
     line_end[d1] = pos_i;
-    for (int j = 0; j < num_d2; ++j) {
+    for (int j = 0; j <= num_d2; ++j) {
       const float pos_j = min_d2 + j * cell_size;
       line_start[d2] = pos_j;
       line_end[d2] = pos_j;
@@ -64,6 +66,35 @@ VoxelGrid::VoxelGrid(
   // TODO: Compute the interior voxels.
 }
 
+// Ball grid constructor.
+VoxelGrid::VoxelGrid(const float cell_size, const int radius)
+    : cell_size_(cell_size) {
+  const int diameter = 2 * radius;
+  num_cells_x_ = diameter;
+  num_cells_y_ = diameter;
+  num_cells_z_ = diameter;
+  const float min_value = -cell_size_ * radius;
+  min_x_ = min_value;
+  min_y_ = min_value;
+  min_z_ = min_value;
+  // Compute the interior of the sphere.
+  const float r = radius * cell_size_;
+  const float r2 = r * r;
+  for (int i = 0; i < num_cells_x_; ++i) {
+    const float dx = min_x_ + i * cell_size_;
+    for (int j = 0; j < num_cells_y_; ++j) {
+      const float dy = min_y_ + j * cell_size_;
+      for (int k = 0; k < num_cells_z_; ++k) {
+        const float dz = min_z_ + k * cell_size_;
+        const float d2 = (dx * dx) + (dy * dy) + (dz * dz);
+        if (d2 <= r2) {
+          grid_map_[i][j][k] = 1;
+        }
+      }
+    }
+  }
+}
+
 float VoxelGrid::ConvolveAtPoint(const VoxelGrid &filter,
     const float x, const float y, const float z) const {
   // TODO
@@ -76,7 +107,27 @@ float VoxelGrid::ConvolveAtCell(
   return 0;
 }
 
-void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) const {
+void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) {
+  // Fill in cells that have a density value.
+  const float half_cell_size = cell_size_ / 2;
+  const float quarter_cell_size = cell_size_ / 4;
+  std::ostringstream id_sstream;
+  for (int i = 0; i < num_cells_x_; ++i) {
+    const float x = min_x_ + i * cell_size_ + half_cell_size;
+    for (int j = 0; j < num_cells_y_; ++j) {
+      const float y = min_y_ + j * cell_size_ + half_cell_size;
+      for (int k = 0; k < num_cells_z_; ++k) {
+        if (grid_map_[i][j][k] > 0) {
+          const float z = min_z_ + k * cell_size_ + half_cell_size;
+          id_sstream.str("");
+          id_sstream << "inner_" << i << "_" << j << "_" << k;
+          viewer->addSphere(
+              PointXYZ(x, y, z), quarter_cell_size, 255, 0, 0, id_sstream.str());
+        }
+      }
+    }
+  }
+  // Draw lines for the x, y, and z axes, respectively.
   DrawLinesForAxis(viewer, cell_size_, 0, 1, 2, min_x_, min_y_, min_z_,
       num_cells_x_, num_cells_y_, num_cells_z_);
   DrawLinesForAxis(viewer, cell_size_, 1, 0, 2, min_y_, min_x_, min_z_,
