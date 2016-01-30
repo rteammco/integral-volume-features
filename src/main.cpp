@@ -45,7 +45,7 @@ int main (int argc, char **argv) {
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
-  VoxelGrid voxel_grid(0.5, *cloud);
+  VoxelGrid voxel_grid(0.8, *cloud);
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");

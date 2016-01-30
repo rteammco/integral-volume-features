@@ -51,9 +51,9 @@ class VoxelGrid {
     float min_x_;
     float min_y_;
     float min_z_;
-    int max_x_index_;
-    int max_y_index_;
-    int max_z_index_;
+    int num_cells_x_;
+    int num_cells_y_;
+    int num_cells_z_;
 
     // The GridMap contains all of the voxel volumes. Access as follows:
     //   grid_map_[x][y][z] = val;
