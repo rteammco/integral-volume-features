@@ -6,8 +6,11 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include "voxel_grid.h"
+
 
 int main (int argc, char **argv) {
+  iv_descriptor::VoxelGrid g;
   //const std::string filename = "../data/bun000.ply";
   const std::string filename = "../data/table_scene_lms400.pcd";
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
