@@ -6,7 +6,6 @@
 #include <string>
 
 #include "voxel_grid.h"
-
 using iv_descriptor::VoxelGrid;
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -21,7 +20,7 @@ int main (int argc, char **argv) {
   // Determine voxel grid cell size.
   // -!- Build voxel grid.
   // Determine which voxels are interior and which are exterior.
-  // Create grid ball.
+  // -!- Create grid ball.
   // For each point in the cloud, compute the intersection.
   // Compute standard deviation of the data.
   // Compute histogram bin width using Scott's rule.
@@ -36,7 +35,10 @@ int main (int argc, char **argv) {
   // Computing interior of voxel grid.
   // Ball Voxel Grid builder.
 
-  const std::string filename = "../data/table_scene_lms400.pcd";
+  const std::string filename = "../data/example.pcd";
+  //const std::string filename =
+  //    "../data/stanford_bunny/data/bun000_Structured.pcd";
+  //const std::string filename = "../data/table_scene_lms400.pcd";
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
   pcl::PCDReader reader;
@@ -45,8 +47,10 @@ int main (int argc, char **argv) {
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
-  VoxelGrid voxel_grid(0.8, *cloud);
-  VoxelGrid ball_grid(0.1, 5);
+  const float voxel_size = 0.1;
+  VoxelGrid voxel_grid(voxel_size, *cloud);
+  std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
+  VoxelGrid ball_grid(voxel_size, 10);
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");
@@ -55,8 +59,8 @@ int main (int argc, char **argv) {
   viewer.addPointCloud<PointXYZ>(cloud, single_color, "Point Cloud");
   viewer.setPointCloudRenderingProperties(
       PCL_VISUALIZER_POINT_SIZE, 1, "Point Cloud");
-  //voxel_grid.AddToViewer(&viewer);
-  ball_grid.AddToViewer(&viewer);
+  voxel_grid.AddToViewer(&viewer);
+  //ball_grid.AddToViewer(&viewer);
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
   viewer.spin();

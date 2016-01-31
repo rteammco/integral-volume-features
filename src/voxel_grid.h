@@ -5,10 +5,18 @@
 
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <string>
 #include <unordered_map>
 
 
 namespace iv_descriptor {
+
+// A simple struct containing a 3D index into the voxel grid.
+struct Index3d {
+  int x;
+  int y;
+  int z;
+};
 
 // A 3D grid map: GridMap[x][y][z] = val. Defines a sparse 3D grid.
 using GridZ = std::unordered_map<int, float>;
@@ -39,7 +47,7 @@ class VoxelGrid {
     //
     // The given filter must have the same voxel cell size as this voxel grid.
     float ConvolveAtPoint(const VoxelGrid &filter,
-                          const float x, const float y, const float z) const;
+                          const pcl::PointXYZ &point) const;
 
     // Performs a single convolution operation of the given filter at the given
     // (x, y, z) grid cell location. This is effectively an intersection dot
@@ -56,6 +64,10 @@ class VoxelGrid {
     // Adds the voxel lines to be displayed in the 3D viewer for visualization.
     void AddToViewer(pcl::visualization::PCLVisualizer *viewer) const;
 
+    // Returns the size string in the form of "W x H x D" where W is width,
+    // H is height, and D is depth (x, y, z dimensions, respectively).
+    std::string GetSizeString() const;
+
   private:
     // Grid size variables.
     float cell_size_;
@@ -71,6 +83,9 @@ class VoxelGrid {
     // Writing is possible to any arbitrary coordinate. Reading from an
     // undefined coordinate will automatically return a default value of 0.
     GridMap grid_map_;
+
+    // Computes the 3D grid index for a given point.
+    const Index3d GetGridIndex(const pcl::PointXYZ &point) const;
 
 };  // class VoxelGrid
 

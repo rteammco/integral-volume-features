@@ -5,10 +5,9 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
-
-#include <iostream>
 
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -65,7 +64,11 @@ VoxelGrid::VoxelGrid(
   min_x_ = min_bounds.x - cell_size_;
   min_y_ = min_bounds.y - cell_size_;
   min_z_ = min_bounds.z - cell_size_;
-  // TODO: Compute the interior voxels.
+  // Compute the border voxels.
+  for (const PointXYZ &point : cloud) {
+    const Index3d indices = GetGridIndex(point);
+    grid_map_[indices.x][indices.y][indices.z] = 1;
+  }
 }
 
 // Ball grid constructor.
@@ -118,10 +121,10 @@ float VoxelGrid::GetValueAtCell(const int x, const int y, const int z) const {
   return grid_z.at(z_iter->first);
 }
 
-float VoxelGrid::ConvolveAtPoint(const VoxelGrid &filter,
-    const float x, const float y, const float z) const {
-  // TODO
-  return 0;
+float VoxelGrid::ConvolveAtPoint(
+    const VoxelGrid &filter, const PointXYZ &point) const {
+  const Index3d indices = GetGridIndex(point);
+  return ConvolveAtCell(filter, indices.x, indices.y, indices.z);
 }
 
 float VoxelGrid::ConvolveAtCell(
@@ -164,8 +167,8 @@ void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) const {
           const float z = min_z_ + k * cell_size_ + half_cell_size;
           id_sstream.str("");
           id_sstream << "inner_" << i << "_" << j << "_" << k;
-          viewer->addSphere(
-              PointXYZ(x, y, z), quarter_cell_size, 255, 0, 0, id_sstream.str());
+          viewer->addSphere(PointXYZ(x, y, z), quarter_cell_size,
+                            255, 0, 0, id_sstream.str());
         }
       }
     }
@@ -177,6 +180,22 @@ void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) const {
       num_cells_y_, num_cells_x_, num_cells_z_);
   DrawLinesForAxis(viewer, cell_size_, 2, 0, 1, min_z_, min_x_, min_y_,
       num_cells_z_, num_cells_x_, num_cells_y_);
+}
+
+std::string VoxelGrid::GetSizeString() const {
+  std::ostringstream size_sstream;
+  size_sstream <<
+      num_cells_x_ << " x " << num_cells_y_ << " x " << num_cells_z_;
+  return size_sstream.str();
+}
+
+// Private method.
+const Index3d VoxelGrid::GetGridIndex(const pcl::PointXYZ &point) const {
+  Index3d indices;
+  indices.x = int((point.x - min_x_) / cell_size_);
+  indices.y = int((point.y - min_y_) / cell_size_);
+  indices.z = int((point.z - min_z_) / cell_size_);
+  return indices;
 }
 
 };  // namespace iv_descriptor
