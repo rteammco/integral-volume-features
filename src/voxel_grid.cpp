@@ -72,19 +72,39 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
 // Static method.
 float VoxelGrid::EstimatePointCloudResolution(
     const PointCloud<PointXYZ>::ConstPtr &cloud) {
+  const int num_nearest_neighbors = 7;
+  const int max_sample_count = 5;
   float total_distances = 0;
+  int total_count = 0;
   // Randomly choose 50 points in the point cloud (or all if there are less
   // than 50 available).
-  const int num_samples = (cloud->size() >= 50) ? 50 : cloud->size();
+  const int num_samples =
+      (cloud->size() >= max_sample_count) ? max_sample_count : cloud->size();
   std::vector<int> sample_indices = GetRandomSamples(
       cloud->size(), num_samples);
   // For each, look up its 7 nearest neighbors, and take the average distance.
   pcl::KdTreeFLANN<PointXYZ> kdtree;
   kdtree.setInputCloud(cloud);
   for (const int index : sample_indices) {
-    //const PointXYZ &point = cloud[index];
+    const PointXYZ &point = cloud->points[index];
+    std::vector<int> neighbor_indices(num_nearest_neighbors);
+    std::vector<float> neighbor_distances_squared(num_nearest_neighbors);
+    // Search for 1 extra nearest neighbor, since the point itself will come up
+    // as one of the results.
+    const int num_found = kdtree.nearestKSearch(
+        point, num_nearest_neighbors + 1,
+        neighbor_indices, neighbor_distances_squared);
+    for (int i = 0; i < num_found; ++i) {
+      if (neighbor_indices[i] != index) {
+        total_distances += sqrt(neighbor_distances_squared[i]);
+        total_count++;
+      }
+    }
   }
-  return total_distances / num_samples;
+  if (total_count == 0) {
+    return 0;
+  }
+  return total_distances / total_count;
 }
 
 // Point cloud voxelization constructor.

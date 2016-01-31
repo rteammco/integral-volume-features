@@ -47,8 +47,8 @@ int main (int argc, char **argv) {
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
-  const float tmp = VoxelGrid::EstimatePointCloudResolution(cloud);
-  const float voxel_size = 0.1;
+  const float voxel_size = VoxelGrid::EstimatePointCloudResolution(cloud);
+  std::cout << "Estimated PCR: " << voxel_size << std::endl;
   VoxelGrid voxel_grid(voxel_size, cloud);
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
   voxel_grid.ComputeWatertightVoxelRepresentation();
