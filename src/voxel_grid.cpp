@@ -2,18 +2,40 @@
 
 #include <cmath>
 #include <pcl/common/common.h>
+#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <sstream>
+#include <stdlib.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include <iostream>  // TODO: remove
 
 using pcl::PointCloud;
 using pcl::PointXYZ;
 
 
 namespace iv_descriptor {
+
+// Random sampling method: returns k integers between 0 and n-1 sampled
+// randomly. This is based on the Fisher–Yates shuffle algorithm.
+std::vector<int> GetRandomSamples(const int n, const int k) {
+  std::vector<int> samples;
+  samples.reserve(k);
+  std::unordered_map<int, int> assigned;
+  for (int i = 0; i < k; ++i) {
+    const int r = rand() % (n - i);
+    if (assigned.find(r) == assigned.end()) {
+      samples.push_back(r);
+    } else {
+      samples.push_back(assigned[r]);
+    }
+    assigned[r] = (n - i) - 1;
+  }
+  return samples;
+}
 
 // Adds lines for the given primary axis d0. d1 and d2 should be indices of the
 // other two axes. For example, to draw lines in the x-axis, set d0 to 0, and d1
@@ -47,14 +69,32 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
   }
 }
 
+// Static method.
+float VoxelGrid::EstimatePointCloudResolution(
+    const PointCloud<PointXYZ>::ConstPtr &cloud) {
+  float total_distances = 0;
+  // Randomly choose 50 points in the point cloud (or all if there are less
+  // than 50 available).
+  const int num_samples = (cloud->size() >= 50) ? 50 : cloud->size();
+  std::vector<int> sample_indices = GetRandomSamples(
+      cloud->size(), num_samples);
+  // For each, look up its 7 nearest neighbors, and take the average distance.
+  pcl::KdTreeFLANN<PointXYZ> kdtree;
+  kdtree.setInputCloud(cloud);
+  for (const int index : sample_indices) {
+    //const PointXYZ &point = cloud[index];
+  }
+  return total_distances / num_samples;
+}
+
 // Point cloud voxelization constructor.
 VoxelGrid::VoxelGrid(
-    const float cell_size, const PointCloud<PointXYZ> &cloud)
+    const float cell_size, const PointCloud<PointXYZ>::ConstPtr &cloud)
     : cell_size_(cell_size) {
   // Set up the voxel grid dimensions.
   PointXYZ min_bounds;
   PointXYZ max_bounds;
-  pcl::getMinMax3D<PointXYZ>(cloud, min_bounds, max_bounds);
+  pcl::getMinMax3D<PointXYZ>(*cloud, min_bounds, max_bounds);
   const float length_x = max_bounds.x - min_bounds.x;
   const float length_y = max_bounds.y - min_bounds.y;
   const float length_z = max_bounds.z - min_bounds.z;
@@ -65,7 +105,7 @@ VoxelGrid::VoxelGrid(
   min_y_ = min_bounds.y - cell_size_;
   min_z_ = min_bounds.z - cell_size_;
   // Compute the border voxels.
-  for (const PointXYZ &point : cloud) {
+  for (const PointXYZ &point : cloud->points) {
     const Index3d indices = GetGridIndex(point);
     grid_map_[indices.x][indices.y][indices.z] = 1;
   }

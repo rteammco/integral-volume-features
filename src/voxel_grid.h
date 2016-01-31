@@ -26,10 +26,15 @@ using GridMap = std::unordered_map<int, GridY>;
 // Defines a voxel grid.
 class VoxelGrid {
   public:
+    // Computes an appropriate voxel cell size using the point cloud resolution
+    // method.
+    static float EstimatePointCloudResolution(
+        const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
+
     // Builds the voxel grid using the bounds given by the point cloud. Each
     // voxel will be a cube with edge length set to cell_size.
     VoxelGrid(const float cell_size,
-              const pcl::PointCloud<pcl::PointXYZ> &cloud);
+              const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
 
     // Returns a cubic VoxelGrid that contains a voxelized ball (sphere) of
     // the given radius. Voxels that are inside the sphere have a value of 1,
