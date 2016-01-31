@@ -50,6 +50,7 @@ int main (int argc, char **argv) {
   const float voxel_size = 0.1;
   VoxelGrid voxel_grid(voxel_size, *cloud);
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
+  voxel_grid.ComputeWatertightVoxelRepresentation();
   VoxelGrid ball_grid(voxel_size, 10);
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.

@@ -36,6 +36,11 @@ class VoxelGrid {
     // and all other voxels get a value of 0.
     VoxelGrid(const float cell_size, const int radius);
 
+    // Computes internal voxels using the watertight voxel method. Voxels that
+    // are found to be internal will receive a value of 1. All other voxels
+    // will have a value of 0.
+    void ComputeWatertightVoxelRepresentation();
+
     // A const getter that returns the value at cell position (x, y, z) in the
     // grid. If the value doesn't exist (i.e. the given coordinates are out of
     // bounds, 0 will be returned instead. The cells are 0-indexed.

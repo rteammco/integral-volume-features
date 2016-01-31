@@ -100,6 +100,109 @@ VoxelGrid::VoxelGrid(const float cell_size, const int radius)
   }
 }
 
+//void Something(const int d0, const int d1, const int d2,
+//               const int num_d0, const int num_d1, const int num_d2) {
+//  for (int j = 0; j < num_d1; ++j) {
+//    for (int k = 0; k < num_d2; ++k) {
+//      bool inside = false;
+//      int start_index = 0;
+//      for (int i = 0; i < num_d0; ++i) {
+//        if (GetValueAtCell(i, j, k) == 1) {
+//          if (inside) {
+//            for (int a = start_index + 1; a < i; ++a) {
+//              if (d0 == 0) {
+//                grid_map_[a][j][k]--;
+//              }
+//            }
+//          } else {
+//            start_index = i;
+//          }
+//          inside = !inside;
+//        }
+//      }
+//    }
+//  }
+//}
+
+void VoxelGrid::ComputeWatertightVoxelRepresentation() {
+  // TODO: this is repeating code. Make it a function somehow.
+  // Compute in the x-direction.
+  for (int y = 0; y < num_cells_y_; ++y) {
+    for (int z = 0; z < num_cells_z_; ++z) {
+      bool inside = false;
+      int start_index = 0;
+      for (int x = 0; x < num_cells_x_; ++x) {
+        if (GetValueAtCell(x, y, z) == 1) {
+          // If encountered a second surface cell, subtract 1 between the two
+          // surfaces.
+          if (inside) {
+            for (int a = start_index; a < x; ++a) {
+              grid_map_[a][y][z]--;
+            }
+          } else {  // Otherwise, set the start index.
+            start_index = x + 1;
+          }
+          inside = !inside;
+        }
+      }
+    }
+  }
+  // Compute in the y-direction.
+  for (int x = 0; x < num_cells_x_; ++x) {
+    for (int z = 0; z < num_cells_z_; ++z) {
+      bool inside = false;
+      int start_index = 0;
+      for (int y = 0; y < num_cells_y_; ++y) {
+        if (GetValueAtCell(x, y, z) == 1) {
+          if (inside) {
+            for (int a = start_index; a < y; ++a) {
+              grid_map_[x][a][z]--;
+            }
+          } else {
+            start_index = y + 1;
+          }
+          inside = !inside;
+        }
+      }
+    }
+  }
+  // Compute in the z-direction.
+  for (int x = 0; x < num_cells_x_; ++x) {
+    for (int y = 0; y < num_cells_y_; ++y) {
+      bool inside = false;
+      int start_index = 0;
+      for (int z = 0; z < num_cells_z_; ++z) {
+        if (GetValueAtCell(x, y, z) == 1) {
+          if (inside) {
+            for (int a = start_index; a < z; ++a) {
+              grid_map_[x][y][a]--;
+            }
+          } else {
+            start_index = z + 1;
+          }
+          inside = !inside;
+        }
+      }
+    }
+  }
+  // Switch all cells with a value of -2 or lower to 1, and 0 otherwise.
+  for (int x = 0; x < num_cells_x_; ++x) {
+    for (int y = 0; y < num_cells_y_; ++y) {
+      for (int z = 0; z < num_cells_z_; ++z) {
+        const float cell_value = GetValueAtCell(x, y, z);
+        // If the value is <= 2, it becomes an internal voxel. Otherwise, reset
+        // it to 0 (only if it isn't already 0).
+        if (cell_value <= -2) {
+          grid_map_[x][y][z] = 1;
+        } else if (cell_value != 0) {
+          grid_map_[x][y][z] = 0;
+        }
+      }
+    }
+  }
+  // TODO: Check all cells to eliminate and tubular holes caused by noise.
+}
+
 float VoxelGrid::GetValueAtCell(const int x, const int y, const int z) const {
   // Search the x coordinate first. Return 0 if it doesn't exist.
   const GridMap::const_iterator x_iter = grid_map_.find(x);
