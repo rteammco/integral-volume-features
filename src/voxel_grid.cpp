@@ -5,6 +5,7 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 
 #include <iostream>
@@ -47,6 +48,7 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
   }
 }
 
+// Point cloud voxelization constructor.
 VoxelGrid::VoxelGrid(
     const float cell_size, const PointCloud<PointXYZ> &cloud)
     : cell_size_(cell_size) {
@@ -95,6 +97,27 @@ VoxelGrid::VoxelGrid(const float cell_size, const int radius)
   }
 }
 
+float VoxelGrid::GetValueAtCell(const int x, const int y, const int z) const {
+  // Search the x coordinate first. Return 0 if it doesn't exist.
+  const GridMap::const_iterator x_iter = grid_map_.find(x);
+  if (x_iter == grid_map_.end()) {
+    return 0;
+  }
+  // Now search the y coordinate.
+  const GridY &grid_y = grid_map_.at(x_iter->first);
+  const GridY::const_iterator y_iter = grid_y.find(y);
+  if (y_iter == grid_y.end()) {
+    return 0;
+  }
+  // Finally, search the z coordinate.
+  const GridZ &grid_z = grid_y.at(y_iter->first);
+  const GridZ::const_iterator z_iter = grid_z.find(z);
+  if (z_iter == grid_z.end()) {
+    return 0;
+  }
+  return grid_z.at(z_iter->first);
+}
+
 float VoxelGrid::ConvolveAtPoint(const VoxelGrid &filter,
     const float x, const float y, const float z) const {
   // TODO
@@ -103,11 +126,31 @@ float VoxelGrid::ConvolveAtPoint(const VoxelGrid &filter,
 
 float VoxelGrid::ConvolveAtCell(
     const VoxelGrid &filter, const int x, const int y, const int z) const {
-  // TODO
-  return 0;
+  // If cell sizes don't match, return 0.
+  if (cell_size_ != filter.cell_size_) {
+    return 0;
+  }
+  // Run the convolution centered at the given index.
+  float total = 0;
+  const int filter_center_x = filter.num_cells_x_ / 2;
+  const int filter_center_y = filter.num_cells_y_ / 2;
+  const int filter_center_z = filter.num_cells_z_ / 2;
+  for (int i = 0; i < filter.num_cells_x_; ++i) {
+    for (int j = 0; j < filter.num_cells_y_; ++j) {
+      for (int k = 0; k < filter.num_cells_z_; ++k) {
+        const float filter_val = filter.GetValueAtCell(i, j, k);
+        const float grid_val = GetValueAtCell(
+            x + (i - filter_center_x),
+            y + (j - filter_center_y),
+            z + (k - filter_center_z));
+        total += filter_val * grid_val;
+      }
+    }
+  }
+  return total;
 }
 
-void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) {
+void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) const {
   // Fill in cells that have a density value.
   const float half_cell_size = cell_size_ / 2;
   const float quarter_cell_size = cell_size_ / 4;
@@ -117,7 +160,7 @@ void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) {
     for (int j = 0; j < num_cells_y_; ++j) {
       const float y = min_y_ + j * cell_size_ + half_cell_size;
       for (int k = 0; k < num_cells_z_; ++k) {
-        if (grid_map_[i][j][k] > 0) {
+        if (GetValueAtCell(i, j, k) > 0) {
           const float z = min_z_ + k * cell_size_ + half_cell_size;
           id_sstream.str("");
           id_sstream << "inner_" << i << "_" << j << "_" << k;
@@ -136,4 +179,4 @@ void VoxelGrid::AddToViewer(pcl::visualization::PCLVisualizer *viewer) {
       num_cells_z_, num_cells_x_, num_cells_y_);
 }
 
-};
+};  // namespace iv_descriptor

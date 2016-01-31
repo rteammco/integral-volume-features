@@ -11,7 +11,7 @@
 namespace iv_descriptor {
 
 // A 3D grid map: GridMap[x][y][z] = val. Defines a sparse 3D grid.
-using GridZ = std::unordered_map<int, int>;
+using GridZ = std::unordered_map<int, float>;
 using GridY = std::unordered_map<int, GridZ>;
 using GridMap = std::unordered_map<int, GridY>;
 
@@ -27,6 +27,11 @@ class VoxelGrid {
     // the given radius. Voxels that are inside the sphere have a value of 1,
     // and all other voxels get a value of 0.
     VoxelGrid(const float cell_size, const int radius);
+
+    // A const getter that returns the value at cell position (x, y, z) in the
+    // grid. If the value doesn't exist (i.e. the given coordinates are out of
+    // bounds, 0 will be returned instead. The cells are 0-indexed.
+    float GetValueAtCell(const int x, const int y, const int z) const;
 
     // Performs a single convolution operation of the given filter at the given
     // (x, y, z) location in 3D space. This location is translated into cell
@@ -49,7 +54,7 @@ class VoxelGrid {
         const VoxelGrid &filter, const int x, const int y, const int z) const;
 
     // Adds the voxel lines to be displayed in the 3D viewer for visualization.
-    void AddToViewer(pcl::visualization::PCLVisualizer *viewer);
+    void AddToViewer(pcl::visualization::PCLVisualizer *viewer) const;
 
   private:
     // Grid size variables.
