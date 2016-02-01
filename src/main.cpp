@@ -5,7 +5,10 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <string>
 
+#include "config.h"
 #include "voxel_grid.h"
+
+using iv_descriptor::Config;
 using iv_descriptor::VoxelGrid;
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -14,12 +17,12 @@ using pcl::visualization::PCLVisualizer;
 using pcl::visualization::PointCloudColorHandlerCustom;
 
 
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
   // Process args.
   // Load data model.
-  // Determine voxel grid cell size.
+  // -!- Determine voxel grid cell size.
   // -!- Build voxel grid.
-  // Determine which voxels are interior and which are exterior.
+  // -!- Determine which voxels are interior and which are exterior.
   // -!- Create grid ball.
   // For each point in the cloud, compute the intersection.
   // Compute standard deviation of the data.
@@ -35,14 +38,11 @@ int main (int argc, char **argv) {
   // Computing interior of voxel grid.
   // Ball Voxel Grid builder.
 
-  const std::string filename = "../data/example.pcd";
-  //const std::string filename =
-  //    "../data/stanford_bunny/data/bun000_Structured.pcd";
-  //const std::string filename = "../data/table_scene_lms400.pcd";
+  Config config("config.txt");
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
   pcl::PCDReader reader;
-  if (reader.read<PointXYZ>(filename, *cloud) == -1) {
+  if (reader.read<PointXYZ>(config.GetPointCloudFileName(), *cloud) == -1) {
     PCL_ERROR("Couldn't read file!\n");
     return -1;
   }
@@ -52,6 +52,7 @@ int main (int argc, char **argv) {
   VoxelGrid voxel_grid(voxel_size, cloud);
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
   voxel_grid.ComputeWatertightVoxelRepresentation();
+  std::cout << "Watertight voxel representation computed." << std::endl;
   VoxelGrid ball_grid(voxel_size, 10);
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
