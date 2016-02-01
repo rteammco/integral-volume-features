@@ -1,9 +1,11 @@
+#include <cmath>
 #include <iostream>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <string>
+#include <vector>
 
 #include "config.h"
 #include "voxel_grid.h"
@@ -17,6 +19,24 @@ using pcl::visualization::PCLVisualizer;
 using pcl::visualization::PointCloudColorHandlerCustom;
 
 
+// Uses Scott's Rule (1979) to determine the optimal histogram bin size given
+// the set of filter values.
+float ScottsRuleBinSize(const std::vector<float> &values) {
+  // Compute the standard deviation of the data.
+  float mean = 0;
+  for (const float value : values) {
+    mean += value;
+  }
+  mean = mean / values.size();
+  float squared_diffs = 0;
+  for (const float value : values) {
+    const float diff = (value - mean);
+    squared_diffs += diff * diff;
+  }
+  float standard_deviation = sqrt((1.0 / values.size()) * squared_diffs);
+  return (3.49 * standard_deviation) / cbrt(values.size());
+}
+
 int main(int argc, char **argv) {
   // List of TODO items: "-!-" means finished.
   // -!- Process args (uses config file now).
@@ -25,14 +45,15 @@ int main(int argc, char **argv) {
   // -!- Build voxel grid.
   // -!- Determine which voxels are interior and which are exterior.
   // -!- Create grid ball.
-  // For each point in the cloud, compute the intersection.
-  // Compute standard deviation of the data.
-  // Compute histogram bin width using Scott's rule.
+  // -!- For each point in the cloud, compute the intersection.
+  // -!- Compute standard deviation of the data.
+  // -!- Compute histogram bin width using Scott's rule.
   // Find bins with the rarest (<= 1%) of points.
   // Mark the appropriate points for selection - cluster, or range threshold.
   // Repeat for multiple radii of the sphere.
   // Select points that were features for at least 2 consecutive radii.
   Config config("config.txt");
+
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
   pcl::PCDReader reader;
@@ -41,13 +62,25 @@ int main(int argc, char **argv) {
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
+
+  // Build the integral volume voxel grid around the point cloud.
   const float voxel_size = VoxelGrid::EstimatePointCloudResolution(cloud);
   std::cout << "Estimated PCR: " << voxel_size << std::endl;
   VoxelGrid voxel_grid(voxel_size, cloud);
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
   voxel_grid.ComputeWatertightVoxelRepresentation();
   std::cout << "Watertight voxel representation computed." << std::endl;
+
+  // Create the ball and convolve with the voxel grid.
   VoxelGrid ball_grid(voxel_size, 10);
+  std::vector<float> values;
+  values.reserve(cloud->size());
+  for (const PointXYZ &point : cloud->points) {
+    values.push_back(voxel_grid.ConvolveAtPoint(ball_grid, point));
+  }
+  const float bin_size = ScottsRuleBinSize(values);
+  std::cout << bin_size << std::endl;
+
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");
