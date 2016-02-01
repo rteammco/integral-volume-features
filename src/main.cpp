@@ -3,6 +3,7 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -61,9 +62,10 @@ int main(int argc, char **argv) {
   for (const PointXYZ &point : cloud->points) {
     values.push_back(voxel_grid.ConvolveAtPoint(ball_grid, point));
   }
-  // Create a histogram and a bin size for it.
+
+  // Create a histogram and find the rare output values.
   Histogram hist(values);
-  std::cout << hist.GetRareValues(0.1).size() << std::endl;
+  std::vector<int> rare_indices = hist.GetRareValues(0.1);  // TODO: config!
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
@@ -73,8 +75,17 @@ int main(int argc, char **argv) {
   viewer.addPointCloud<PointXYZ>(cloud, single_color, "Point Cloud");
   viewer.setPointCloudRenderingProperties(
       PCL_VISUALIZER_POINT_SIZE, 1, "Point Cloud");
-  if (config.IsDisplayGridEnabled()) {
+  if (config.IsDisplayGridEnabled()) {  // Draw the grid if enabled.
     voxel_grid.AddToViewer(&viewer);
+  }
+  // Draw the rare values.
+  const float keypoint_radius = voxel_size / 4;
+  std::ostringstream id_sstream;
+  for (const int index : rare_indices) {
+    id_sstream.str("");
+    id_sstream << "keypoint_" << index;
+    viewer.addSphere(
+        cloud->points[index], keypoint_radius, 255, 0, 0, id_sstream.str());
   }
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
