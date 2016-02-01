@@ -38,6 +38,18 @@ int main(int argc, char **argv) {
   // Select points that were features for at least 2 consecutive radii.
   Config config("config.txt");
 
+  if (config.HasVoxelGridFileName()) {
+    std::cout << "vg name provided." << std::endl;
+  } else {
+    std::cout << "no vg name." << std::endl;
+  }
+  if (config.ReadVoxelGridFromFile()) {
+    std::cout << "read" << std::endl;
+  } else {
+    std::cout << "write" << std::endl;
+  }
+  std::cout << "name = " << config.GetVoxelGridFileName() << std::endl;
+
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
   pcl::PCDReader reader;

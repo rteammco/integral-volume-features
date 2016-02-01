@@ -22,6 +22,19 @@ public:
   // identification step.
   float GetRareKeypointFraction() const;
 
+  // Returns true if the user provided a file name from which to load the voxel
+  // grid instead of rebuilding it or save the grid to for exporting.
+  bool HasVoxelGridFileName() const;
+
+  // Returns true if the user wanted the voxel grid to be loaded from the
+  // provided file name, or false if the intent was to build the voxel grid
+  // and export it to this file.
+  bool ReadVoxelGridFromFile() const;
+
+  // Returns the filename of the voxel grid file if the user specified loading
+  // the voxel grid from a file. Otherwise, an empty string is returned.
+  std::string GetVoxelGridFileName() const;
+
   // Returns true if the option to display the voxel grid is enabled.
   bool IsDisplayGridEnabled() const;
 
@@ -31,6 +44,17 @@ private:
 
   // The fraction of rare keypoints to select. Should be between 0 and 1.
   float rare_keypoint_fraction_;
+
+  // True if a voxel grid file name was provided.
+  bool has_voxel_grid_file_name_;
+
+  // True if the voxel grid file (if provided) should be read from to load the
+  // voxel grid. If false, the user intends to write the voxel grid to that file
+  // instead.
+  bool read_voxel_grid_;
+
+  // The name of the voxel grid file (if provided).
+  std::string voxel_grid_file_name_;
 
   // Option to show the grid or not for the point cloud. Should be false if
   // using weaker hardware or very big point clouds.

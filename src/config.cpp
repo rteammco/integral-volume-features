@@ -18,6 +18,12 @@ Config::Config(const std::string &config_file_name) {
     infile >> point_cloud_file_name_;
     infile >> rare_keypoint_fraction_;
     infile >> display_grid_;
+    if (infile >> voxel_grid_file_name_) {
+      has_voxel_grid_file_name_ = true;
+      infile >> read_voxel_grid_;
+    } else {
+      has_voxel_grid_file_name_ = false;
+    }
   } else {  // Otherwise set default params and write them to the file.
     point_cloud_file_name_ = DEFAULT_POINT_CLOUD_FILE_NAME;
     rare_keypoint_fraction_ = DEFAULT_RARE_KEYPOINT_FRACTION;
@@ -37,6 +43,21 @@ std::string Config::GetPointCloudFileName() const {
 
 float Config::GetRareKeypointFraction() const {
   return rare_keypoint_fraction_;
+}
+
+bool Config::HasVoxelGridFileName() const {
+  return has_voxel_grid_file_name_;
+}
+
+bool Config::ReadVoxelGridFromFile() const {
+  return read_voxel_grid_;
+}
+
+std::string Config::GetVoxelGridFileName() const {
+  if (!has_voxel_grid_file_name_) {
+    return "";
+  }
+  return voxel_grid_file_name_;
 }
 
 bool Config::IsDisplayGridEnabled() const {
