@@ -22,6 +22,12 @@ public:
   // preserve the index of the given values as given.
   Histogram(const std::vector<float> &values);
 
+  // Returns the indices of all points that fall into bins covering less than
+  // the given fraction of the data. This method expects 0 < fraction <= 1.
+  // If the given number is more than 1, it will become 1. If 0 or lower is
+  // given, an empty list will be returned.
+  std::vector<int> GetRareValues(const float fraction) const;
+
 private:
   // This list of lists represents the bins of the histogram. Each index in the
   // outer list is the bin number. The list of numbers in each bin correspond
@@ -30,6 +36,9 @@ private:
   // TODO: might be faster to sort by bin size (using ordered set) for faster
   // lookup of bins with the fewest data points.
   std::vector<std::vector<int>> bins_;
+
+  // The total number of data points in this histogram, across all bins.
+  const int num_points_;
 
 };  // class Histogram
 

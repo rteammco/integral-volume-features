@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
     values.push_back(voxel_grid.ConvolveAtPoint(ball_grid, point));
   }
   // Create a histogram and a bin size for it.
-  const float bin_size = Histogram::ScottsRuleBinSize(values);
-  std::cout << bin_size << std::endl;
+  Histogram hist(values);
+  std::cout << hist.GetRareValues(0.1).size() << std::endl;
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.

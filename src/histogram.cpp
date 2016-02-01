@@ -6,7 +6,8 @@
 
 namespace iv_descriptor {
 
-Histogram::Histogram(const std::vector<float> &values) {
+Histogram::Histogram(const std::vector<float> &values)
+    : num_points_(values.size()) {
   // Compute bin size and number of bins.
   const float bin_size = ScottsRuleBinSize(values);
   if (bin_size <= 0) {
@@ -53,6 +54,20 @@ float Histogram::ScottsRuleBinSize(const std::vector<float> &values) {
   // Compute bin size using Scott's rule.
   const double bin_size = (3.49 * standard_deviation) / cbrt(values.size());
   return (float)bin_size;
+}
+
+std::vector<int> Histogram::GetRareValues(const float fraction) const {
+  std::vector<int> indices;
+  const int min_bin_size = (int)(ceil(fraction * num_points_));
+  // TODO: if bins_ was sorted by bin size, this would be a faster operation.
+  for (const std::vector<int> &bin : bins_) {
+    if (bin.size() <= min_bin_size) {
+      for (const int point_index : bin) {
+        indices.push_back(point_index);
+      }
+    }
+  }
+  return indices;
 }
 
 };  // namespace iv_descriptor
