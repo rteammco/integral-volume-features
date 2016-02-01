@@ -25,9 +25,16 @@ public:
   // Returns the file name of the point cloud data model.
   std::string GetPointCloudFileName() const;
 
+  // Returns true if the option to display the voxel grid is enabled.
+  bool IsDisplayGridEnabled() const;
+
 private:
   // The name of the point cloud data file to be used.
   std::string point_cloud_file_name_;
+
+  // Option to show the grid or not for the point cloud. Should be false if
+  // using weaker hardware or very big point clouds.
+  bool display_grid_;
 
 };  // class Config
 

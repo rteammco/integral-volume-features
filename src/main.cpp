@@ -18,8 +18,9 @@ using pcl::visualization::PointCloudColorHandlerCustom;
 
 
 int main(int argc, char **argv) {
-  // Process args.
-  // Load data model.
+  // List of TODO items: "-!-" means finished.
+  // -!- Process args (uses config file now).
+  // -!- Load data model.
   // -!- Determine voxel grid cell size.
   // -!- Build voxel grid.
   // -!- Determine which voxels are interior and which are exterior.
@@ -31,13 +32,6 @@ int main(int argc, char **argv) {
   // Mark the appropriate points for selection - cluster, or range threshold.
   // Repeat for multiple radii of the sphere.
   // Select points that were features for at least 2 consecutive radii.
-
-  // TODO:
-  // Determine voxel grid size?
-  // Building voxel grid.
-  // Computing interior of voxel grid.
-  // Ball Voxel Grid builder.
-
   Config config("config.txt");
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
@@ -62,8 +56,9 @@ int main(int argc, char **argv) {
   viewer.addPointCloud<PointXYZ>(cloud, single_color, "Point Cloud");
   viewer.setPointCloudRenderingProperties(
       PCL_VISUALIZER_POINT_SIZE, 1, "Point Cloud");
-  voxel_grid.AddToViewer(&viewer);
-  //ball_grid.AddToViewer(&viewer);
+  if (config.IsDisplayGridEnabled()) {
+    voxel_grid.AddToViewer(&viewer);
+  }
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
   viewer.spin();
