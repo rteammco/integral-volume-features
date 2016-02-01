@@ -72,8 +72,9 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
 // Static method.
 float VoxelGrid::EstimatePointCloudResolution(
     const PointCloud<PointXYZ>::ConstPtr &cloud) {
+  // TODO: These should be parameters (7 / 50).
   const int num_nearest_neighbors = 7;
-  const int max_sample_count = 5;
+  const int max_sample_count = 50;
   float total_distances = 0;
   int total_count = 0;
   // Randomly choose 50 points in the point cloud (or all if there are less
