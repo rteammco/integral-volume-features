@@ -65,7 +65,8 @@ int main(int argc, char **argv) {
 
   // Create a histogram and find the rare output values.
   Histogram hist(values);
-  std::vector<int> rare_indices = hist.GetRareValues(0.1);  // TODO: config!
+  std::vector<int> rare_indices =
+      hist.GetRareValues(config.GetRareKeypointFraction());
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
   if (config.IsDisplayGridEnabled()) {  // Draw the grid if enabled.
     voxel_grid.AddToViewer(&viewer);
   }
-  // Draw the rare values.
+  // Draw the rare points (keypoints).
   const float keypoint_radius = voxel_size / 4;
   std::ostringstream id_sstream;
   for (const int index : rare_indices) {

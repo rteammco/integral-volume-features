@@ -9,13 +9,6 @@
 
 namespace iv_descriptor {
 
-// Returns the default point cloud file name. Use this only if a configuration
-// file specifying the user's desired data is not available.
-inline const std::string& DefaultPointCloudFileName() {
-  static const std::string filename("../data/example.pcd");
-  return filename;
-}
-
 class Config {
 public:
   // Attempts to read the given config file, or writes the default values to
@@ -25,12 +18,19 @@ public:
   // Returns the file name of the point cloud data model.
   std::string GetPointCloudFileName() const;
 
+  // Returns the fraction of rare keypoints to use in the keypoint
+  // identification step.
+  float GetRareKeypointFraction() const;
+
   // Returns true if the option to display the voxel grid is enabled.
   bool IsDisplayGridEnabled() const;
 
 private:
   // The name of the point cloud data file to be used.
   std::string point_cloud_file_name_;
+
+  // The fraction of rare keypoints to select. Should be between 0 and 1.
+  float rare_keypoint_fraction_;
 
   // Option to show the grid or not for the point cloud. Should be false if
   // using weaker hardware or very big point clouds.
