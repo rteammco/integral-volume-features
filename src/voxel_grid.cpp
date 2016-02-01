@@ -5,6 +5,7 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <fstream>
 #include <sstream>
 #include <stdlib.h>
 #include <string>
@@ -159,6 +160,27 @@ VoxelGrid::VoxelGrid(const float cell_size, const int radius)
       }
     }
   }
+}
+
+// Load from file constructor.
+VoxelGrid::VoxelGrid(const std::string &file_name) {
+  // TODO
+  std::ifstream infile(file_name);
+  if (!infile) {
+    // TODO: error logging?
+    return;
+  }
+  // Read the necessary metadata.
+  infile >> cell_size_;
+  infile >> min_x_ >> min_y_ >> min_z_;
+  infile >> num_cells_x_ >> num_cells_y_ >> num_cells_z_;
+  // Then read all of the non-zero voxel values.
+  int x, y, z;
+  float val;
+  while (infile >> x >> y >> z >> val) {
+    grid_map_[x][y][z] = val;
+  }
+  infile.close();
 }
 
 //void Something(const int d0, const int d1, const int d2,
@@ -351,6 +373,30 @@ std::string VoxelGrid::GetSizeString() const {
   size_sstream <<
       num_cells_x_ << " x " << num_cells_y_ << " x " << num_cells_z_;
   return size_sstream.str();
+}
+
+void VoxelGrid::ExportToFile(const std::string &file_name) const {
+  std::ofstream outfile(file_name);
+  if (!outfile) {
+    // TODO: error logging?
+    return;
+  }
+  // Write the necessary metadata.
+  outfile << cell_size_ << " ";
+  outfile << min_x_ << " " << min_y_ << " " << min_z_ << " ";
+  outfile << num_cells_x_ << " " << num_cells_y_ << " " << num_cells_z_ << "\n";
+  // Then write all of the non-zero voxel values.
+  for (int i = 0; i < num_cells_x_; ++i) {
+    for (int j = 0; j < num_cells_y_; ++j) {
+      for (int k = 0; k < num_cells_z_; ++k) {
+        const float val = GetValueAtCell(i, j, k);
+        if (val != 0) {
+          outfile << i << " " << j << " " << k << " " << val << "\n";
+        }
+      }
+    }
+  }
+  outfile.close();
 }
 
 // Private method.

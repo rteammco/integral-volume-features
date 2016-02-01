@@ -36,10 +36,14 @@ class VoxelGrid {
     VoxelGrid(const float cell_size,
               const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
 
-    // Returns a cubic VoxelGrid that contains a voxelized ball (sphere) of
-    // the given radius. Voxels that are inside the sphere have a value of 1,
-    // and all other voxels get a value of 0.
+    // Creates a cubic VoxelGrid that contains a voxelized ball (sphere) of the
+    // given radius. Voxels that are inside the sphere have a value of 1, and
+    // all other voxels get a value of 0.
     VoxelGrid(const float cell_size, const int radius);
+
+    // Creates a voxel grid from a file (formatted in the way that the
+    // ExportToFile function formats it).
+    VoxelGrid(const std::string &file_name);
 
     // Computes internal voxels using the watertight voxel method. Voxels that
     // are found to be internal will receive a value of 1. All other voxels
@@ -77,6 +81,16 @@ class VoxelGrid {
     // Returns the size string in the form of "W x H x D" where W is width,
     // H is height, and D is depth (x, y, z dimensions, respectively).
     std::string GetSizeString() const;
+
+    // Exports the entire voxel grid (including volume values) to a file. This
+    // file can be loaded later to avoid re-computing the internal surface
+    // volume. The first line of the file contains the voxel size, minimum x,
+    // y, z values of the grid, and the number of cells in the x, y, z axes.
+    // Each subsequent line of the file represents a single voxel:
+    //   x y z v
+    // Where (x, y, z) are the voxel coordinates, and v is its non-zero value.
+    // All unlisted voxels are assumed to have a value of 0.
+    void ExportToFile(const std::string &file_name) const;
 
   private:
     // Grid size variables.
