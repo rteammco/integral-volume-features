@@ -1,4 +1,3 @@
-#include <cmath>
 #include <iostream>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
@@ -8,9 +7,11 @@
 #include <vector>
 
 #include "config.h"
+#include "histogram.h"
 #include "voxel_grid.h"
 
 using iv_descriptor::Config;
+using iv_descriptor::Histogram;
 using iv_descriptor::VoxelGrid;
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -18,24 +19,6 @@ using pcl::visualization::PCL_VISUALIZER_POINT_SIZE;
 using pcl::visualization::PCLVisualizer;
 using pcl::visualization::PointCloudColorHandlerCustom;
 
-
-// Uses Scott's Rule (1979) to determine the optimal histogram bin size given
-// the set of filter values.
-float ScottsRuleBinSize(const std::vector<float> &values) {
-  // Compute the standard deviation of the data.
-  float mean = 0;
-  for (const float value : values) {
-    mean += value;
-  }
-  mean = mean / values.size();
-  float squared_diffs = 0;
-  for (const float value : values) {
-    const float diff = (value - mean);
-    squared_diffs += diff * diff;
-  }
-  float standard_deviation = sqrt((1.0 / values.size()) * squared_diffs);
-  return (3.49 * standard_deviation) / cbrt(values.size());
-}
 
 int main(int argc, char **argv) {
   // List of TODO items: "-!-" means finished.
@@ -78,7 +61,8 @@ int main(int argc, char **argv) {
   for (const PointXYZ &point : cloud->points) {
     values.push_back(voxel_grid.ConvolveAtPoint(ball_grid, point));
   }
-  const float bin_size = ScottsRuleBinSize(values);
+  // Create a histogram and a bin size for it.
+  const float bin_size = Histogram::ScottsRuleBinSize(values);
   std::cout << bin_size << std::endl;
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
