@@ -3,6 +3,7 @@
 #include <cmath>
 #include <pcl/common/common.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <fstream>

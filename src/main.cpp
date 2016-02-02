@@ -1,6 +1,9 @@
 #include <iostream>
+#include <pcl/common/common.h>
+#include <pcl/common/transforms.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <sstream>
@@ -32,7 +35,7 @@ int main(int argc, char **argv) {
   // -!- For each point in the cloud, compute the intersection.
   // -!- Compute standard deviation of the data.
   // -!- Compute histogram bin width using Scott's rule.
-  // Find bins with the rarest (<= 1%) of points.
+  // -!- Find bins with the rarest (<= 1%) of points.
   // Mark the appropriate points for selection - cluster, or range threshold.
   // Repeat for multiple radii of the sphere.
   // Select points that were features for at least 2 consecutive radii.
@@ -46,6 +49,26 @@ int main(int argc, char **argv) {
     return -1;
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
+
+  // Scale the point cloud so that it's centered and approximately 2 units
+  // across in the X axis and center it on the origin.
+  PointXYZ min_bounds, max_bounds;
+  pcl::getMinMax3D<PointXYZ>(*cloud, min_bounds, max_bounds);
+  // Center the point cloud on the origin.
+  const float center_x = (max_bounds.x - min_bounds.x) / 2;
+  const float center_y = (max_bounds.y - min_bounds.y) / 2;
+  const float center_z = (max_bounds.z - min_bounds.z) / 2;
+  Eigen::Affine3f translation_mat = Eigen::Affine3f::Identity();
+  translation_mat.translation() << -center_x, -center_y, -center_z;
+  pcl::transformPointCloud(*cloud, *cloud, translation_mat);
+  // Now scale it.
+  const float scale = 2.0 / (max_bounds.x - min_bounds.x);
+  Eigen::Matrix4f scale_mat = Eigen::Matrix4f::Identity();
+  scale_mat(0, 0) = scale;
+  scale_mat(1, 1) = scale;
+  scale_mat(2, 2) = scale;
+  pcl::transformPointCloud(*cloud, *cloud, scale_mat);
+  std::cout << "Cloud resized and centered." << std::endl;
 
   // Build the integral volume voxel grid around the point cloud or load it
   // from a file (depending on user's specifications).
@@ -79,11 +102,13 @@ int main(int argc, char **argv) {
   for (const PointXYZ &point : cloud->points) {
     values.push_back(voxel_grid.ConvolveAtPoint(ball_grid, point));
   }
+  std::cout << "Convolution with ball done." << std::endl;
 
   // Create a histogram and find the rare output values.
   Histogram hist(values);
   std::vector<int> rare_indices =
       hist.GetRareValues(config.GetRareKeypointFraction());
+  std::cout << "Found " << rare_indices.size() << " keypoints." << std::endl;
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
