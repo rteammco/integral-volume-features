@@ -50,7 +50,11 @@ bool Config::HasVoxelGridFileName() const {
 }
 
 bool Config::ReadVoxelGridFromFile() const {
-  return read_voxel_grid_;
+  return HasVoxelGridFileName() && read_voxel_grid_;
+}
+
+bool Config::WriteVoxelGridToFile() const {
+  return HasVoxelGridFileName() && !read_voxel_grid_;
 }
 
 std::string Config::GetVoxelGridFileName() const {

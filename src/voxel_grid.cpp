@@ -109,28 +109,15 @@ float VoxelGrid::EstimatePointCloudResolution(
   return total_distances / total_count;
 }
 
-// Point cloud voxelization constructor.
-VoxelGrid::VoxelGrid(
-    const float cell_size, const PointCloud<PointXYZ>::ConstPtr &cloud)
-    : cell_size_(cell_size) {
-  // Set up the voxel grid dimensions.
-  PointXYZ min_bounds;
-  PointXYZ max_bounds;
-  pcl::getMinMax3D<PointXYZ>(*cloud, min_bounds, max_bounds);
-  const float length_x = max_bounds.x - min_bounds.x;
-  const float length_y = max_bounds.y - min_bounds.y;
-  const float length_z = max_bounds.z - min_bounds.z;
-  num_cells_x_ = int(ceil(length_x / cell_size_)) + 2;
-  num_cells_y_ = int(ceil(length_y / cell_size_)) + 2;
-  num_cells_z_ = int(ceil(length_z / cell_size_)) + 2;
-  min_x_ = min_bounds.x - cell_size_;
-  min_y_ = min_bounds.y - cell_size_;
-  min_z_ = min_bounds.z - cell_size_;
-  // Compute the border voxels.
-  for (const PointXYZ &point : cloud->points) {
-    const Index3d indices = GetGridIndex(point);
-    grid_map_[indices.x][indices.y][indices.z] = 1;
-  }
+// Default constructor.
+VoxelGrid::VoxelGrid() {
+  cell_size_ = 0;
+  min_x_ = 0;
+  min_y_ = 0;
+  min_z_ = 0;
+  num_cells_x_ = 0;
+  num_cells_y_ = 0;
+  num_cells_z_ = 0;
 }
 
 // Ball grid constructor.
@@ -162,15 +149,38 @@ VoxelGrid::VoxelGrid(const float cell_size, const int radius)
   }
 }
 
+// Point cloud voxelization constructor.
+void VoxelGrid::BuildAroundPointCloud(
+    const float cell_size, const PointCloud<PointXYZ>::ConstPtr &cloud) {
+  // Set up the voxel grid dimensions.
+  cell_size_ = cell_size;
+  PointXYZ min_bounds;
+  PointXYZ max_bounds;
+  pcl::getMinMax3D<PointXYZ>(*cloud, min_bounds, max_bounds);
+  const float length_x = max_bounds.x - min_bounds.x;
+  const float length_y = max_bounds.y - min_bounds.y;
+  const float length_z = max_bounds.z - min_bounds.z;
+  num_cells_x_ = int(ceil(length_x / cell_size_)) + 2;
+  num_cells_y_ = int(ceil(length_y / cell_size_)) + 2;
+  num_cells_z_ = int(ceil(length_z / cell_size_)) + 2;
+  min_x_ = min_bounds.x - cell_size_;
+  min_y_ = min_bounds.y - cell_size_;
+  min_z_ = min_bounds.z - cell_size_;
+  // Compute the border voxels.
+  for (const PointXYZ &point : cloud->points) {
+    const Index3d indices = GetGridIndex(point);
+    grid_map_[indices.x][indices.y][indices.z] = 1;
+  }
+}
+
 // Load from file constructor.
-VoxelGrid::VoxelGrid(const std::string &file_name) {
-  // TODO
+bool VoxelGrid::LoadFromFile(const std::string &file_name) {
   std::ifstream infile(file_name);
   if (!infile) {
-    // TODO: error logging?
-    return;
+    return false;
   }
   // Read the necessary metadata.
+  // TODO: check for failures here.
   infile >> cell_size_;
   infile >> min_x_ >> min_y_ >> min_z_;
   infile >> num_cells_x_ >> num_cells_y_ >> num_cells_z_;
@@ -181,6 +191,7 @@ VoxelGrid::VoxelGrid(const std::string &file_name) {
     grid_map_[x][y][z] = val;
   }
   infile.close();
+  return true;
 }
 
 //void Something(const int d0, const int d1, const int d2,
@@ -373,6 +384,10 @@ std::string VoxelGrid::GetSizeString() const {
   size_sstream <<
       num_cells_x_ << " x " << num_cells_y_ << " x " << num_cells_z_;
   return size_sstream.str();
+}
+
+float VoxelGrid::GetVoxelSize() const {
+  return cell_size_;
 }
 
 void VoxelGrid::ExportToFile(const std::string &file_name) const {

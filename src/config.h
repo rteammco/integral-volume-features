@@ -26,10 +26,14 @@ public:
   // grid instead of rebuilding it or save the grid to for exporting.
   bool HasVoxelGridFileName() const;
 
-  // Returns true if the user wanted the voxel grid to be loaded from the
-  // provided file name, or false if the intent was to build the voxel grid
-  // and export it to this file.
+  // Returns true if the user wanted the voxel grid to be loaded from a file
+  // and a file name was provided.
   bool ReadVoxelGridFromFile() const;
+
+  // Returns true if the user wanted the voxel grid to be written out to
+  // a file and provided the file name. This method returns the opposite of
+  // ReadFromGridFile if the file name is provided.
+  bool WriteVoxelGridToFile() const;
 
   // Returns the filename of the voxel grid file if the user specified loading
   // the voxel grid from a file. Otherwise, an empty string is returned.

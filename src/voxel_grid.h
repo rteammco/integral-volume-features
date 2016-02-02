@@ -31,19 +31,24 @@ class VoxelGrid {
     static float EstimatePointCloudResolution(
         const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
 
-    // Builds the voxel grid using the bounds given by the point cloud. Each
-    // voxel will be a cube with edge length set to cell_size.
-    VoxelGrid(const float cell_size,
-              const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
+    // Default constructor (creates an empty voxel grid object). This needs to
+    // be initialized with LoadFromFile or BuildAroundPointCloud before using.
+    VoxelGrid();
 
     // Creates a cubic VoxelGrid that contains a voxelized ball (sphere) of the
     // given radius. Voxels that are inside the sphere have a value of 1, and
     // all other voxels get a value of 0.
     VoxelGrid(const float cell_size, const int radius);
 
+    // Builds the voxel grid using the bounds given by the point cloud. Each
+    // voxel will be a cube with edge length set to cell_size.
+    void BuildAroundPointCloud(
+        const float cell_size,
+        const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud);
+
     // Creates a voxel grid from a file (formatted in the way that the
     // ExportToFile function formats it).
-    VoxelGrid(const std::string &file_name);
+    bool LoadFromFile(const std::string &file_name);
 
     // Computes internal voxels using the watertight voxel method. Voxels that
     // are found to be internal will receive a value of 1. All other voxels
@@ -81,6 +86,9 @@ class VoxelGrid {
     // Returns the size string in the form of "W x H x D" where W is width,
     // H is height, and D is depth (x, y, z dimensions, respectively).
     std::string GetSizeString() const;
+
+    // Returns the size of the grid's voxels (the edge length).
+    float GetVoxelSize() const;
 
     // Exports the entire voxel grid (including volume values) to a file. This
     // file can be loaded later to avoid re-computing the internal surface

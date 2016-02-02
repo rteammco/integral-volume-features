@@ -38,18 +38,6 @@ int main(int argc, char **argv) {
   // Select points that were features for at least 2 consecutive radii.
   Config config("config.txt");
 
-  if (config.HasVoxelGridFileName()) {
-    std::cout << "vg name provided." << std::endl;
-  } else {
-    std::cout << "no vg name." << std::endl;
-  }
-  if (config.ReadVoxelGridFromFile()) {
-    std::cout << "read" << std::endl;
-  } else {
-    std::cout << "write" << std::endl;
-  }
-  std::cout << "name = " << config.GetVoxelGridFileName() << std::endl;
-
   // Load the data file into a PointCloud object and build the voxel grid.
   PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
   pcl::PCDReader reader;
@@ -59,13 +47,30 @@ int main(int argc, char **argv) {
   }
   std::cout << "Loaded " << cloud->size() << " points." << std::endl;
 
-  // Build the integral volume voxel grid around the point cloud.
-  const float voxel_size = VoxelGrid::EstimatePointCloudResolution(cloud);
-  std::cout << "Estimated PCR: " << voxel_size << std::endl;
-  VoxelGrid voxel_grid(voxel_size, cloud);
+  // Build the integral volume voxel grid around the point cloud or load it
+  // from a file (depending on user's specifications).
+  VoxelGrid voxel_grid;
+  if (config.ReadVoxelGridFromFile()) {
+    if (voxel_grid.LoadFromFile(config.GetVoxelGridFileName())) {
+      std::cout << "Loaded grid from file." << std::endl;
+    } else {
+      std::cerr << "Failed to load file." << std::endl;
+      return -1;
+    }
+  } else {
+    const float voxel_size = VoxelGrid::EstimatePointCloudResolution(cloud);
+    voxel_grid.BuildAroundPointCloud(voxel_size, cloud);
+    voxel_grid.ComputeWatertightVoxelRepresentation();
+    std::cout << "Watertight voxel representation computed." << std::endl;
+    // If write to file is specified, save the voxel grid.
+    if (config.WriteVoxelGridToFile()) {
+      voxel_grid.ExportToFile(config.GetVoxelGridFileName());
+      std::cout << "Exported grid to file." << std::endl;
+    }
+  }
+  const float voxel_size = voxel_grid.GetVoxelSize();
+  std::cout << "Voxel edge length: " << voxel_size << std::endl;
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
-  voxel_grid.ComputeWatertightVoxelRepresentation();
-  std::cout << "Watertight voxel representation computed." << std::endl;
 
   // Create the ball and convolve with the voxel grid.
   VoxelGrid ball_grid(voxel_size, 10);
