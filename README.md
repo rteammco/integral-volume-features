@@ -12,6 +12,7 @@ Build Instructions
 ----------
 
 <ol>
+  <li>Make sure all the required tools and libraries are installed (see below).</li>
   <li><code>git clone https://github.com/teammcr192/integral-volume-features.git</code></li>
   <li><code>cd integral-volume-features</code></li>
   <li><code>mkdir build</code></li>
@@ -27,6 +28,10 @@ Required Tools and Libraries
 <ul>
   <li>GCC 4.7+ (uses C++11 features)</li>
   <li>CMake 2.8+: https://cmake.org/</li>
-  <li>PCL (Point Cloud Library): http://pointclouds.org/</li>
+  <li>PCL (Point Cloud Library): http://pointclouds.org/
+    <ul>
+      <li>NOTE: The official binaries for Ubuntu are only supported up to version 14.04 (http://pointclouds.org/downloads/linux.html).</li>
+    </ul>
+  </li>
   <li>Google Test: https://github.com/google/googletest</li>
 </ul>
