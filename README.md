@@ -33,5 +33,9 @@ Required Tools and Libraries
       <li>NOTE: The official binaries for Ubuntu are only supported up to version 14.04 (http://pointclouds.org/downloads/linux.html).</li>
     </ul>
   </li>
-  <li>Google Test: https://github.com/google/googletest</li>
+  <li>Google Test: https://github.com/google/googletest
+    <ul>
+      <li>Here's a good tutorial for installing it on Ubuntu: http://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/</li>
+    </ul>
+  </li>
 </ul>
