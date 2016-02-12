@@ -28,6 +28,8 @@ Config::Config(const std::string &config_file_name) {
     point_cloud_file_name_ = DEFAULT_POINT_CLOUD_FILE_NAME;
     rare_keypoint_fraction_ = DEFAULT_RARE_KEYPOINT_FRACTION;
     display_grid_ = DEFAULT_DISPLAY_GRID;
+    has_voxel_grid_file_name_ = false;
+    read_voxel_grid_ = false;
     // Write the values to the file.
     std::ofstream outfile(config_file_name);
     outfile << point_cloud_file_name_ << "\n";
