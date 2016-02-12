@@ -13,7 +13,7 @@ class Config {
 public:
   // Attempts to read the given config file, or writes the default values to
   // it if it doesn't exist.
-  Config(const std::string &config_file_name);
+  explicit Config(const std::string &config_file_name);
 
   // Returns the file name of the point cloud data model.
   std::string GetPointCloudFileName() const;

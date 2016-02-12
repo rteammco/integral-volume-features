@@ -20,7 +20,7 @@ public:
 
   // Builds the histogram from the given list of values. The histogram will
   // preserve the index of the given values as given.
-  Histogram(const std::vector<float> &values);
+  explicit Histogram(const std::vector<float> &values);
 
   // Returns the indices of all points that fall into bins covering less than
   // the given fraction of the data. This method expects 0 < fraction <= 1.
