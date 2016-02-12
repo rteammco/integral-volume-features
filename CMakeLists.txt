@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-set(project_name IVFeatures)
-project(${project_name} C CXX)
+set(proj_name IVFeatures)
+set(proj_bin ivfeatures)
+project(${proj_name} C CXX)
 
 
 # Set the compiler to C++11:
@@ -16,33 +17,30 @@ add_definitions(${PCL_DEFINITIONS})
 
 
 # Build for the main executable:
-file(GLOB ivfeatures_src "src/*.h" "src/*.cpp")
-add_executable(ivfeatures ${ivfeatures_src})
-target_link_libraries(ivfeatures ${PCL_LIBRARIES})
+file(GLOB proj_src "src/*.h" "src/*.cpp")
+add_executable(${proj_bin} ${proj_src})
+target_link_libraries(${proj_bin} ${PCL_LIBRARIES})
 
 
 # Add gtest (the Google test library) to the package:
 find_package(GTest REQUIRED)
-set(ivfeatures_include "src/")
-include_directories(${GTEST_INCLUDE_DIRS} ${ivfeatures_include})
-
-# Test stuff.
 find_package(Threads REQUIRED)
+set(proj_include "src/")
+include_directories(${GTEST_INCLUDE_DIRS} ${proj_include})
 
+
+# Set up tests.
 enable_testing()
-set(project_test_name ${project_name}_test)
-
-file(GLOB ivfeatures_test_src "test/*.cpp")
-add_executable(${project_test_name} ${ivfeatures_test_src})
-add_dependencies(${project_test_name} googletest)
-
-target_link_libraries(${project_test_name}
-      /usr/src/gtest/libgtest.a
-      /usr/src/gtest/libgtest_main.a
-#      ${GTEST_LIBS_DIR}/libgtest.a
-#      ${GTEST_LIBS_DIR}/libgtest_main.a
-      )
-
-target_link_libraries(${project_test_name} ${CMAKE_THREAD_LIBS_INIT})
-
-add_test(test1 ${project_test_name})
+set(proj_test_bin ${proj_bin}_test)
+file(GLOB proj_test_src "test/*.cpp")
+add_executable(${proj_test_bin} ${proj_test_src})
+add_dependencies(${proj_test_bin} googletest)
+# TODO: gtest_libs_dir - how to make CMake automatically find it?
+set(gtest_libs_dir "/usr/src/gtest")
+target_link_libraries(${proj_test_bin}
+      ${gtest_libs_dir}/libgtest.a
+      ${gtest_libs_dir}/libgtest_main.a
+)
+target_link_libraries(${proj_test_bin} ${CMAKE_THREAD_LIBS_INIT})
+# Adds test to Makefile (run "make test"):
+add_test(test1 ${proj_test_bin})
