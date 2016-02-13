@@ -37,8 +37,7 @@ The current CMakeLists.txt file only supports Linux (tested on Ubuntu 14.04) due
   </li>
   <li>Google Test: https://github.com/google/googletest
     <ul>
-      <li>Here's a good tutorial for installing it on Ubuntu: http://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/</li>
-      <li>NOTE: CMakeLists.txt assumes that the GTest library files are in <code>/usr/src/gtest/</code>. This can be changed by updating the <code>gtest_libs_dir</code> variable.</li>
+      <li>This code uses both Google Test and Google Mock components. See <code>INSTALL_GTEST</code> for install instructions.</li>
     </ul>
   </li>
 </ul>

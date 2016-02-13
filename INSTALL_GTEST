@@ -1,0 +1,11 @@
+This file contains instructions for installing the Google Test libraries on
+Linux. Require CMake and GCC (see https://github.com/google/googletest for
+more details).
+
+git clone https://github.com/google/googletest.git
+cd googletest
+mkdir build
+cd build
+cmake ..
+make
+sudo make install

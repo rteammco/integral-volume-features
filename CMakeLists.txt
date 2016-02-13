@@ -35,12 +35,16 @@ set(proj_test_bin ${proj_bin}_test)
 file(GLOB proj_test_src "test/*.cpp")
 add_executable(${proj_test_bin} ${proj_test_src})
 add_dependencies(${proj_test_bin} googletest)
-# TODO: gtest_libs_dir - how to make CMake automatically find it?
-set(gtest_libs_dir "/usr/src/gtest")
-target_link_libraries(${proj_test_bin}
-      ${gtest_libs_dir}/libgtest.a
-      ${gtest_libs_dir}/libgtest_main.a
-)
+# Find the GTest library files.
+find_library(gtest_lib gtest libgtest.a libgtest)
+find_library(gtest_main_lib gtest_main libgtest_main.a libgtest_main)
+# Find the GMock library files.
+find_library(gmock_lib gmock libgmock.a libgmock)
+find_library(gmock_main_lib gmock_main libgmock_main.a libgmock_main)
+# Link the located gtest and gmock libraries to the test binary.
+target_link_libraries(${proj_test_bin} ${gtest_lib} ${gtest_main_lib})
+target_link_libraries(${proj_test_bin} ${gmock_lib} ${gmock_main_lib})
+# Link threads library to the test binary.
 target_link_libraries(${proj_test_bin} ${CMAKE_THREAD_LIBS_INIT})
 # Adds test to Makefile (run "make test"):
 add_test(test1 ${proj_test_bin})
