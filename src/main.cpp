@@ -1,4 +1,3 @@
-#include <iostream>
 #include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
 #include <pcl/io/pcd_io.h>
@@ -6,13 +5,15 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "config.h"
-#include "histogram.h"
-#include "voxel_grid.h"
+#include "./config.h"
+#include "./histogram.h"
+#include "./voxel_grid.h"
 
 using iv_descriptor::Config;
 using iv_descriptor::Histogram;

@@ -1,4 +1,4 @@
-#include "config.h"
+#include "./config.h"
 
 #include <fstream>
 #include <string>
@@ -11,7 +11,7 @@ static const float DEFAULT_RARE_KEYPOINT_FRACTION = 0.01;
 static const bool DEFAULT_DISPLAY_GRID = false;
 
 Config::Config(const std::string &config_file_name) {
-  // TODO: allow the order and number of items in the config file to be
+  // TODO(richard): allow the order and number of items in the config file to be
   // arbitrary. This requires better file processing.
   std::ifstream infile(config_file_name);
   if (infile) {  // Read params if the file is available.

@@ -1,19 +1,21 @@
-#include "voxel_grid.h"
+#include "./voxel_grid.h"
 
-#include <cmath>
 #include <pcl/common/common.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+
+#include <stdlib.h>
+
+#include <cmath>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <iostream>  // TODO: remove
+#include <iostream>  // TODO(richard): remove
 
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -74,7 +76,7 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
 // Static method.
 float VoxelGrid::EstimatePointCloudResolution(
     const PointCloud<PointXYZ>::ConstPtr &cloud) {
-  // TODO: These should be parameters (7 / 50).
+  // TODO(richard): These should be parameters (7 / 50).
   const int num_nearest_neighbors = 7;
   const int max_sample_count = 50;
   float total_distances = 0;
@@ -161,9 +163,9 @@ void VoxelGrid::BuildAroundPointCloud(
   const float length_x = max_bounds.x - min_bounds.x;
   const float length_y = max_bounds.y - min_bounds.y;
   const float length_z = max_bounds.z - min_bounds.z;
-  num_cells_x_ = int(ceil(length_x / cell_size_)) + 2;
-  num_cells_y_ = int(ceil(length_y / cell_size_)) + 2;
-  num_cells_z_ = int(ceil(length_z / cell_size_)) + 2;
+  num_cells_x_ = static_cast<int>(ceil(length_x / cell_size_)) + 2;
+  num_cells_y_ = static_cast<int>(ceil(length_y / cell_size_)) + 2;
+  num_cells_z_ = static_cast<int>(ceil(length_z / cell_size_)) + 2;
   min_x_ = min_bounds.x - cell_size_;
   min_y_ = min_bounds.y - cell_size_;
   min_z_ = min_bounds.z - cell_size_;
@@ -181,7 +183,7 @@ bool VoxelGrid::LoadFromFile(const std::string &file_name) {
     return false;
   }
   // Read the necessary metadata.
-  // TODO: check for failures here.
+  // TODO(richard): check for failures here.
   infile >> cell_size_;
   infile >> min_x_ >> min_y_ >> min_z_;
   infile >> num_cells_x_ >> num_cells_y_ >> num_cells_z_;
@@ -195,32 +197,8 @@ bool VoxelGrid::LoadFromFile(const std::string &file_name) {
   return true;
 }
 
-//void Something(const int d0, const int d1, const int d2,
-//               const int num_d0, const int num_d1, const int num_d2) {
-//  for (int j = 0; j < num_d1; ++j) {
-//    for (int k = 0; k < num_d2; ++k) {
-//      bool inside = false;
-//      int start_index = 0;
-//      for (int i = 0; i < num_d0; ++i) {
-//        if (GetValueAtCell(i, j, k) == 1) {
-//          if (inside) {
-//            for (int a = start_index + 1; a < i; ++a) {
-//              if (d0 == 0) {
-//                grid_map_[a][j][k]--;
-//              }
-//            }
-//          } else {
-//            start_index = i;
-//          }
-//          inside = !inside;
-//        }
-//      }
-//    }
-//  }
-//}
-
 void VoxelGrid::ComputeWatertightVoxelRepresentation() {
-  // TODO: this is repeating code. Make it a function somehow.
+  // TODO(richard): this is repeating code. Make it a function somehow.
   // Compute in the x-direction.
   for (int y = 0; y < num_cells_y_; ++y) {
     for (int z = 0; z < num_cells_z_; ++z) {
@@ -295,7 +273,8 @@ void VoxelGrid::ComputeWatertightVoxelRepresentation() {
       }
     }
   }
-  // TODO: Check all cells to eliminate and tubular holes caused by noise.
+  // TODO(richard): Check all cells to eliminate and tubular holes caused by
+  // noise.
 }
 
 float VoxelGrid::GetValueAtCell(const int x, const int y, const int z) const {
@@ -394,7 +373,7 @@ float VoxelGrid::GetVoxelSize() const {
 void VoxelGrid::ExportToFile(const std::string &file_name) const {
   std::ofstream outfile(file_name);
   if (!outfile) {
-    // TODO: error logging?
+    // TODO(richard): error logging?
     return;
   }
   // Write the necessary metadata.
@@ -418,9 +397,9 @@ void VoxelGrid::ExportToFile(const std::string &file_name) const {
 // Private method.
 const Index3d VoxelGrid::GetGridIndex(const pcl::PointXYZ &point) const {
   Index3d indices;
-  indices.x = int((point.x - min_x_) / cell_size_);
-  indices.y = int((point.y - min_y_) / cell_size_);
-  indices.z = int((point.z - min_z_) / cell_size_);
+  indices.x = static_cast<int>((point.x - min_x_) / cell_size_);
+  indices.y = static_cast<int>((point.y - min_y_) / cell_size_);
+  indices.z = static_cast<int>((point.z - min_z_) / cell_size_);
   return indices;
 }
 

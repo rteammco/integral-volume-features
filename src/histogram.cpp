@@ -1,4 +1,4 @@
-#include "histogram.h"
+#include "./histogram.h"
 
 #include <cmath>
 #include <vector>
@@ -23,11 +23,12 @@ Histogram::Histogram(const std::vector<float> &values)
       max_val = value;
     }
   }
-  const int num_bins = (int)(ceil((max_val - min_val) / bin_size)) + 1;
+  const int num_bins =
+      static_cast<int>(ceil((max_val - min_val) / bin_size)) + 1;
   // Put each point into the appropriate bin.
   bins_.resize(num_bins);
   for (int index = 0; index < values.size(); ++index) {
-    const int bin_id = (int)((values[index] - min_val) / bin_size);
+    const int bin_id = static_cast<int>((values[index] - min_val) / bin_size);
     bins_[bin_id].push_back(index);
   }
 }
@@ -53,13 +54,14 @@ float Histogram::ScottsRuleBinSize(const std::vector<float> &values) {
   const double standard_deviation = sqrt((1.0 / values.size()) * squared_diffs);
   // Compute bin size using Scott's rule.
   const double bin_size = (3.49 * standard_deviation) / cbrt(values.size());
-  return (float)bin_size;
+  return static_cast<float>(bin_size);
 }
 
 std::vector<int> Histogram::GetRareValues(const float fraction) const {
   std::vector<int> indices;
-  const int min_bin_size = (int)(ceil(fraction * num_points_));
-  // TODO: if bins_ was sorted by bin size, this would be a faster operation.
+  const int min_bin_size = static_cast<int>(ceil(fraction * num_points_));
+  // TODO(richard): if bins_ was sorted by bin size, this would be a faster
+  // operation.
   for (const std::vector<int> &bin : bins_) {
     if (bin.size() <= min_bin_size) {
       for (const int point_index : bin) {

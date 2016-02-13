@@ -3,8 +3,8 @@
 // Other features include the ability to query the histogram for the bins that
 // contain rare values.
 
-#ifndef HISTOGRAM_H
-#define HISTOGRAM_H
+#ifndef SRC_HISTOGRAM_H_
+#define SRC_HISTOGRAM_H_
 
 #include <vector>
 
@@ -12,7 +12,7 @@
 namespace iv_descriptor {
 
 class Histogram {
-public:
+ public:
   // Uses Scott's Rule (1979) to determine the optimal histogram bin size given
   // the set of values.
   // Returns 0 if values is an empty list (where the bin size is undefined).
@@ -28,21 +28,20 @@ public:
   // given, an empty list will be returned.
   std::vector<int> GetRareValues(const float fraction) const;
 
-private:
+ private:
   // This list of lists represents the bins of the histogram. Each index in the
   // outer list is the bin number. The list of numbers in each bin correspond
   // to the indices of the data points in that bin.
   //
-  // TODO: might be faster to sort by bin size (using ordered set) for faster
-  // lookup of bins with the fewest data points.
+  // TODO(richard): might be faster to sort by bin size (using ordered set) for
+  // faster lookup of bins with the fewest data points.
   std::vector<std::vector<int>> bins_;
 
   // The total number of data points in this histogram, across all bins.
   const int num_points_;
-
 };  // class Histogram
 
 };  // namespace iv_descriptor
 
 
-#endif  // HISTOGRAM_H
+#endif  // SRC_HISTOGRAM_H_
