@@ -72,4 +72,4 @@ std::vector<int> Histogram::GetRareValues(const float fraction) const {
   return indices;
 }
 
-};  // namespace iv_descriptor
+}  // namespace iv_descriptor

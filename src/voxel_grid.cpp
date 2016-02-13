@@ -23,6 +23,8 @@ using pcl::PointXYZ;
 
 namespace iv_descriptor {
 
+namespace {
+
 // Random sampling method: returns k integers between 0 and n-1 sampled
 // randomly. This is based on the Fisher–Yates shuffle algorithm.
 std::vector<int> GetRandomSamples(const int n, const int k) {
@@ -72,6 +74,8 @@ void DrawLinesForAxis(pcl::visualization::PCLVisualizer *viewer,
     }
   }
 }
+
+}  // namespace
 
 // Static method.
 float VoxelGrid::EstimatePointCloudResolution(
@@ -403,4 +407,4 @@ const Index3d VoxelGrid::GetGridIndex(const pcl::PointXYZ &point) const {
   return indices;
 }
 
-};  // namespace iv_descriptor
+}  // namespace iv_descriptor

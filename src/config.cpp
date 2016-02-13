@@ -6,9 +6,13 @@
 
 namespace iv_descriptor {
 
+namespace {
+
 static const std::string DEFAULT_POINT_CLOUD_FILE_NAME = "../data/example.pcd";
 static const float DEFAULT_RARE_KEYPOINT_FRACTION = 0.01;
 static const bool DEFAULT_DISPLAY_GRID = false;
+
+}  // namespace
 
 Config::Config(const std::string &config_file_name) {
   // TODO(richard): allow the order and number of items in the config file to be
@@ -70,4 +74,4 @@ bool Config::IsDisplayGridEnabled() const {
   return display_grid_;
 }
 
-};  // namespace iv_descriptor
+}  // namespace iv_descriptor
