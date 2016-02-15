@@ -4,6 +4,7 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/segmentation/extract_clusters.h>
 #include <pcl/visualization/cloud_viewer.h>
 
 #include <iostream>
@@ -98,6 +99,7 @@ int main(int argc, char **argv) {
   std::cout << "Voxel grid size: " << voxel_grid.GetSizeString() << std::endl;
 
   // Create the ball and convolve with the voxel grid.
+  // TODO(richard): add option to save the convolved values to file as well!
   VoxelGrid ball_grid(voxel_size, 10);
   std::vector<float> values;
   values.reserve(cloud->size());
@@ -115,7 +117,14 @@ int main(int argc, char **argv) {
   // Make a point cloud of rare values only and cluster the rare values.
   PointCloud<PointXYZ>::Ptr rare_cloud(
       new PointCloud<PointXYZ>(*cloud, rare_indices));
-  // TODO(richard): cluster here!
+  std::vector<pcl::PointIndices> cluster_indices;
+  pcl::EuclideanClusterExtraction<PointXYZ> cluster_extraction;
+  cluster_extraction.setClusterTolerance(voxel_size * 3);
+  cluster_extraction.setMinClusterSize(1);
+  cluster_extraction.setMaxClusterSize(rare_cloud->size());
+  cluster_extraction.setInputCloud(rare_cloud);
+  cluster_extraction.extract(cluster_indices);
+  std::cout << "Found " << cluster_indices.size() << " clusters." << std::endl;
 
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
