@@ -25,6 +25,7 @@ using pcl::visualization::PCLVisualizer;
 using pcl::visualization::PointCloudColorHandlerCustom;
 
 
+  // TODO(richard): move algorithm steps into a new class.
 int main(int argc, char **argv) {
   // List of TODO items: "-!-" means finished.
   // -!- Process args (uses config file now).
@@ -111,6 +112,11 @@ int main(int argc, char **argv) {
       hist.GetRareValues(config.GetRareKeypointFraction());
   std::cout << "Found " << rare_indices.size() << " keypoints." << std::endl;
 
+  // Make a point cloud of rare values only and cluster the rare values.
+  PointCloud<PointXYZ>::Ptr rare_cloud(
+      new PointCloud<PointXYZ>(*cloud, rare_indices));
+  // TODO(richard): cluster here!
+
   // Load the PCL 3D visualization window and add the point cloud and voxel
   // grid to be displayed.
   PCLVisualizer viewer("3D Viewer");
@@ -125,11 +131,11 @@ int main(int argc, char **argv) {
   // Draw the rare points (keypoints).
   const float keypoint_radius = voxel_size / 4;
   std::ostringstream id_sstream;
-  for (const int index : rare_indices) {
+  int counter = 0;
+  for (const PointXYZ &rare_point : rare_cloud->points) {
     id_sstream.str("");
-    id_sstream << "keypoint_" << index;
-    viewer.addSphere(
-        cloud->points[index], keypoint_radius, 255, 0, 0, id_sstream.str());
+    id_sstream << "keypoint_" << counter++;
+    viewer.addSphere(rare_point, keypoint_radius, 255, 0, 0, id_sstream.str());
   }
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
