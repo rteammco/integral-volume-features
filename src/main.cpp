@@ -138,13 +138,29 @@ int main(int argc, char **argv) {
     voxel_grid.AddToViewer(&viewer);
   }
   // Draw the rare points (keypoints).
-  const float keypoint_radius = voxel_size / 4;
   std::ostringstream id_sstream;
   int counter = 0;
+  const float rare_point_radius = voxel_size / 8;
   for (const PointXYZ &rare_point : rare_cloud->points) {
     id_sstream.str("");
-    id_sstream << "keypoint_" << counter++;
-    viewer.addSphere(rare_point, keypoint_radius, 255, 0, 0, id_sstream.str());
+    id_sstream << "rare_point_" << counter++;
+    viewer.addSphere(rare_point, rare_point_radius, 255, 0, 0, id_sstream.str());
+  }
+  // Draw the cluster centroids of these rare keypoints.
+  counter = 0;
+  const float centroid_radius = voxel_size / 4;
+  for (const pcl::PointIndices &indices : cluster_indices) {
+    PointCloud<PointXYZ>::Ptr cluster(
+        new PointCloud<PointXYZ>(*rare_cloud, indices.indices));
+    Eigen::Matrix<float, 4, 1> centroid_matrix;
+    // Why do we have to use an Eigen matrix here? Is it just to make PCL as
+    // inconsistent as possible and make it a pain to use?
+    pcl::compute3DCentroid(*cluster, centroid_matrix);
+    PointXYZ centroid(
+        centroid_matrix[0], centroid_matrix[1], centroid_matrix[2]);
+    id_sstream.str("");
+    id_sstream << "centroid_" << counter++;
+    viewer.addSphere(centroid, centroid_radius, 0, 0, 255, id_sstream.str());
   }
   viewer.addCoordinateSystem(1.0);
   viewer.initCameraParameters();
